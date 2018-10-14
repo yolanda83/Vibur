@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <meta charset="UTF-8">
+        <title>Authentication</title>
+    </head>
+
+    <body>
+        <div class="jumbotron">
+            <h1 class="display-4" style="text-align: center">Ejercicio 04 Authentication</h1>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <!--<form action="/e01cs/table?ancho=ancho&alto=alto" method="get">--><!-- 1.context path 2.url pattern 3.recogida de parámetros-->
+                    <form id="form" name="form" class="formulario"> 
+                        <div class="mx-auto pl-5 pr-5 pb-5 pt-4 ml-5 mr-5" style="background-color: #D8F781; width: 70%; border-radius: 7px">
+                            <!--es importante un NAME a cada input pq son los parámetros que pasaremos a java(servlet)-->                                                
+                            <h3 class="mb-3"> Authentication </h3>
+
+                            <div id="contenido">
+                                <div class="form-group">
+                                    <label for="user">User:</label>
+                                    <input type="text" class="form-control" name="user" id="user" value="" placeholder="Escribe el nombre de usuario...">
+                                    <div id="mop1"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="pass">Password:</label>
+                                    <input type="password" class="form-control" name="pass" id="pass" value="" placeholder="Escribe tu contraseña...">
+                                    <div id="mop2"></div>
+                                </div>
+                            </div>
+
+                            <!-- El botón tiene que tener un type submit para que pueda hacer el get o post-->
+                            <!-- El botón tiene que tener un type button para que haga funcion de botón-->
+                            <div>
+                                <button id="botonlogin" type="button" class="btn btn-light">Login</button>
+                                <button id="botondel" type="button" class="btn btn-info">Reset</button>
+                            </div>
+                        </div>
+                    </form>
+
+
+                    <div class="alert alert-danger mx-auto" role="alert" id="fallo" style="width: 70%; text-align: center">
+                    </div>
+
+                    <div class="alert alert-primary mx-auto" role="alert" id="mensajeOk" style="width: 70%; text-align: center">
+                    </div>
+
+                    <div class="alert alert-danger mx-auto" role="alert" id="mensajeEr" style="width: 70%; text-align: center">
+                    </div>
+
+
+                    <div style="text-align: center">
+                        <button id="botonlogout" type="button" class="btn btn-secondary">Logout</button>
+                        <button id="botonsecreto" type="button" class="btn btn-info">Muestra el secreto</button>
+                        <button id="botoncheck" type="button" class="btn btn-secondary">Check</button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <script>
+            $(document).ready(function () {
+
+                $("#botonlogout").css("visibility", "hidden");
+                $("#botonsecreto").css("visibility", "hidden");
+                $("#botoncheck").css("visibility", "hidden");
+//                $("#mensajeOk").css("visibility", "hidden");
+                $("#mensajeOk").css("display", "none");
+                $("#mensajeEr").css("visibility", "hidden");
+                $("#fallo").css("visibility", "hidden");
+
+                $("#botonlogin").click(function () {
+                    var user = $("#user").val();
+                    var pass = $("#pass").val();
+
+                    $.ajax({
+                        url: "json?op=login&user=" + user + "&pass=" + pass,
+                        method: "get",
+                        dataType: "json",
+                        cache: false,
+                        success: function (dataJson) {
+                            if (dataJson.status == 200) {
+                                $("#form").css("display", "none");
+
+                                $("#mensajeOk").empty().append("Status: " + dataJson.status + " | " + "User: " + dataJson.msg);
+                                $("#botonlogout").css("visibility", "visible");
+                                $("#botonsecreto").css("visibility", "visible");
+                                $("#botoncheck").css("visibility", "visible");
+//                                $("#mensajeOk").css("visibility", "visible");
+                                $("#mensajeEr").css("visibility", "hidden");
+                                $("#mensajeOk").css("display", "block");
+//                                $("#mensajeEr").css("display", "none");
+                            } else {
+
+                                $("#mensajeEr").empty().append("Status: " + dataJson.status + " | " + "Error: " + dataJson.msg);
+                                $("#mensajeEr").css("visibility", "visible");
+//                                $("#mensajeOk").css("visibility", "hidden");
+//                                $("#mensajeEr").css("display", "block");
+                                $("#mensajeOk").css("display", "none");
+                            }
+                        }, error: function (dataJson) {
+                            $("#fallo").empty().append("Error al recibir los datos.");
+                            $("#fallo").css("visibility", "visible");
+                        }
+                    });
+                });
+
+                $("#botonlogout").click(function () {
+
+                    $.ajax({
+                        url: "json?op=logout",
+                        method: "get",
+                        dataType: "json",
+                        cache: false,
+                        success: function (dataJson) {
+                            $("#form").css("display", "block");
+                            $("#mensajeOk").empty().append("Status: " + dataJson.status + " | " + "User: " + dataJson.msg);
+                            $("#botonlogout").css("visibility", "hidden");
+                            $("#botonsecreto").css("visibility", "hidden");
+                            $("#botoncheck").css("visibility", "hidden");
+                            $("#user").val("");
+                            $("#pass").val("");
+                        }, error: function (dataJson) {
+                            $("#fallo").empty().append("Error al recibir los datos.");
+                            $("#fallo").css("visibility", "visible");
+                        }
+                    });
+                });
+
+                $("#botonsecreto").click(function () {
+
+                    $.ajax({
+                        url: "json?op=getSecret",
+                        method: "get",
+                        dataType: "json",
+                        cache: false,
+                        success: function (dataJson) {
+                            $("#mensajeOk").empty().append("Status: " + dataJson.status + " | " + "Mensaje: " + dataJson.msg);
+                            $("#mensajeOk").css("display", "block");
+                        }, error: function (dataJson) {
+                            $("#fallo").empty().append("Error al recibir los datos.");
+                            $("#fallo").css("visibility", "visible");
+                        }
+                    });
+                });
+
+                $("#botoncheck").click(function () {
+
+                    $.ajax({
+                        url: "json?op=check",
+                        method: "get",
+                        dataType: "json",
+                        cache: false,
+                        success: function (dataJson) {
+                            $("#mensajeOk").empty().append("Status: " + dataJson.status + " | " + "Usuario logueado: " + dataJson.msg);
+                            $("#mensajeOk").css("display", "block");
+                        }, error: function (dataJson) {
+                            $("#fallo").empty().append("Error al recibir los datos.");
+                            $("#fallo").css("visibility", "visible");
+                        }
+                    });
+                });
+
+                $("#botondel").click(function () {
+                    $("#user").val("");
+                    $("#pass").val("");
+                });
+            });
+
+        </script>
+    </body>
+</html>
